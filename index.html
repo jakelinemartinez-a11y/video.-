@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding & Integración — Capacitación Interactiva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f8f6f1;
+    --accent: #e85d26;
+    --accent2: #2d6a4f;
+    --gold: #f4a535;
+    --muted: #9b9b8a;
+    --surface: #ffffff;
+    --border: #e2ddd6;
+    --progress-h: 5px;
+    --radius: 14px;
+    --shadow: 0 8px 40px rgba(26,26,46,.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-badge {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .logo-badge svg { width: 20px; height: 20px; fill: #fff; }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    color: #fff;
+    letter-spacing: .01em;
+  }
+  header span {
+    margin-left: auto;
+    font-size: .78rem;
+    color: var(--muted);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  /* ── Main layout ── */
+  main {
+    width: 100%;
+    max-width: 960px;
+    padding: 32px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── Chapter label ── */
+  .chapter-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chapter-label .pill {
+    background: var(--accent);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+  .chapter-label h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  /* ── Video wrapper ── */
+  .player-shell {
+    background: var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow);
+  }
+
+  .video-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #0d0d1a;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* ── Overlay question ── */
+  .quiz-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,20,.88);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .quiz-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .quiz-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 32px 36px;
+    width: min(520px, 90%);
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    transform: translateY(20px);
+    transition: transform .35s ease;
+  }
+  .quiz-overlay.active .quiz-card { transform: translateY(0); }
+
+  .quiz-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .quiz-meta .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.4s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.5; transform:scale(1.3); }
+  }
+  .quiz-meta span {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+  }
+
+  .quiz-question {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    line-height: 1.45;
+    color: var(--ink);
+    margin-bottom: 22px;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    color: var(--ink);
+    transition: border-color .2s, background .2s, transform .15s;
+    line-height: 1.4;
+  }
+  .option-btn:hover { border-color: var(--accent); background: #fff5f1; transform: translateX(3px); }
+  .option-btn.selected { border-color: var(--accent); background: #fff5f1; }
+  .option-btn.correct  { border-color: var(--accent2); background: #e8f5ee; }
+  .option-btn.wrong    { border-color: #c0392b; background: #fdecea; }
+  .option-btn .letter {
+    min-width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-size: .8rem;
+    flex-shrink: 0;
+    transition: background .2s, color .2s;
+  }
+  .option-btn.selected .letter { background: var(--accent); color: #fff; }
+  .option-btn.correct  .letter { background: var(--accent2); color: #fff; }
+  .option-btn.wrong    .letter { background: #c0392b; color: #fff; }
+
+  /* feedback */
+  .feedback-msg {
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: .88rem;
+    font-weight: 500;
+    display: none;
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+  .feedback-msg.show  { display: flex; align-items: center; gap: 10px; }
+  .feedback-msg.good  { background: #e8f5ee; color: #1d5c3e; border-left: 4px solid var(--accent2); }
+  .feedback-msg.bad   { background: #fdecea; color: #7b1f1a; border-left: 4px solid #c0392b; }
+  .feedback-msg svg   { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .quiz-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn-confirm, .btn-continue {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-confirm {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-confirm:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-confirm:not(:disabled):hover { opacity: .88; transform: translateY(-1px); }
+
+  .btn-continue {
+    background: var(--ink);
+    color: #fff;
+    display: none;
+  }
+  .btn-continue.show { display: block; }
+  .btn-continue:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* ── Controls bar ── */
+  .controls {
+    background: var(--ink);
+    padding: 0 16px 16px;
+  }
+
+  /* progress */
+  .progress-wrap {
+    position: relative;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .progress-track {
+    position: absolute;
+    left: 0; right: 0;
+    height: var(--progress-h);
+    background: rgba(255,255,255,.15);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 99px;
+    width: 0%;
+    transition: width .15s linear;
+  }
+  .progress-thumb {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%; transform: translateY(-50%);
+    left: 0%;
+    margin-left: -7px;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.25);
+    transition: left .15s linear;
+    pointer-events: none;
+  }
+
+  /* checkpoint markers */
+  .checkpoint-marker {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* buttons row */
+  .btn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .ctrl-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 7px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    transition: background .15s;
+    color: #fff;
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,.1); }
+  .ctrl-btn svg { width: 20px; height: 20px; fill: currentColor; display: block; }
+
+  .time-display {
+    font-size: .8rem;
+    color: rgba(255,255,255,.7);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .vol-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px; height: 4px;
+    background: rgba(255,255,255,.2);
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .spacer { flex: 1; }
+
+  .checkpoint-count {
+    font-size: .75rem;
+    color: rgba(255,255,255,.5);
+    white-space: nowrap;
+  }
+
+  /* ── Progress tracker cards ── */
+  .tracker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .tracker-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color .3s;
+  }
+  .tracker-card.done-correct { border-color: var(--accent2); }
+  .tracker-card.done-wrong   { border-color: #e74c3c; }
+  .tracker-card.active       { border-color: var(--accent); }
+
+  .tracker-card .tc-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tc-num {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--muted);
+  }
+  .tc-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--border);
+    font-size: .8rem;
+  }
+  .tracker-card.done-correct .tc-icon { background: var(--accent2); color: #fff; }
+  .tracker-card.done-wrong   .tc-icon { background: #e74c3c; color: #fff; }
+  .tracker-card.active       .tc-icon { background: var(--accent); color: #fff; animation: pulse 1.2s infinite; }
+
+  .tc-time {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+  }
+  .tc-label {
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  /* ── Source input ── */
+  .source-bar {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .source-bar label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    flex-shrink: 0;
+  }
+  .source-bar input[type=text] {
+    flex: 1;
+    min-width: 160px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    outline: none;
+    background: var(--paper);
+    transition: border-color .2s;
+  }
+  .source-bar input[type=text]:focus { border-color: var(--accent); }
+  .source-bar .btn-load {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+    white-space: nowrap;
+  }
+  .source-bar .btn-load:hover { opacity: .85; }
+
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: .85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .2s;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .file-label:hover { border-color: var(--accent); }
+  .file-label svg { width: 16px; height: 16px; fill: var(--accent); }
+  #fileInput { display: none; }
+
+  .sep { color: var(--muted); font-size: .82rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header h1 { font-size: .9rem; }
+    .tracker { grid-template-columns: 1fr 1fr; }
+    .quiz-card { padding: 24px 20px; }
+    .quiz-question { font-size: 1rem; }
+    input[type=range] { width: 60px; }
+    .chapter-label h2 { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+  </div>
+  <h1>Onboarding &amp; Integración</h1>
+  <span>Capacitación Interactiva</span>
+</header>
+
+<main>
+
+  <!-- Chapter label -->
+  <div class="chapter-label">
+    <span class="pill">Módulo 1</span>
+    <h2>Proceso de Contratación e Integración</h2>
+  </div>
+
+  <!-- Source bar -->
+  <div class="source-bar">
+    <label>Fuente del video</label>
+    <input type="text" id="urlInput" placeholder="https://... o ruta local como videos/onboarding.mp4" value="">
+    <button class="btn-load" onclick="loadFromUrl()">Cargar URL</button>
+    <span class="sep">ó</span>
+    <label class="file-label" for="fileInput">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+      Subir archivo
+    </label>
+    <input type="file" id="fileInput" accept="video/mp4,video/*" onchange="loadFromFile(this)">
+  </div>
+
+  <!-- Player shell -->
+  <div class="player-shell">
+
+    <div class="video-area">
+      <video id="vid" preload="metadata">
+        <!-- Cambia el src aquí si deseas un video predeterminado -->
+        <source src="" type="video/mp4">
+        Tu navegador no soporta la etiqueta de video.
+      </video>
+
+      <!-- Quiz overlay -->
+      <div class="quiz-overlay" id="quizOverlay">
+        <div class="quiz-card">
+          <div class="quiz-meta">
+            <div class="dot"></div>
+            <span>Evaluación de comprensión</span>
+          </div>
+          <p class="quiz-question" id="quizQuestion">Pregunta aquí</p>
+          <div class="options-list" id="optionsList"></div>
+          <div class="feedback-msg" id="feedbackMsg">
+            <svg id="feedbackIcon" viewBox="0 0 24 24"></svg>
+            <span id="feedbackText"></span>
+          </div>
+          <div class="quiz-actions">
+            <button class="btn-confirm" id="btnConfirm" onclick="confirmAnswer()" disabled>Confirmar respuesta</button>
+            <button class="btn-continue" id="btnContinue" onclick="continueVideo()">▶ Continuar video</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <!-- Progress bar -->
+      <div class="progress-wrap" id="progressWrap" onclick="seekVideo(event)">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-thumb" id="progressThumb"></div>
+        <!-- checkpoint markers rendered by JS -->
+      </div>
+
+      <!-- Buttons row -->
+      <div class="btn-row">
+        <!-- Play/Pause -->
+        <button class="ctrl-btn" id="btnPlay" onclick="togglePlay()" title="Reproducir / Pausar">
+          <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <!-- Volume -->
+        <div class="vol-wrap">
+          <button class="ctrl-btn" id="btnMute" onclick="toggleMute()" title="Silenciar">
+            <svg id="iconVol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12zm2.5 0c0 2.21-.9 4.21-2.35 5.65l1.41 1.42A9.97 9.97 0 0 0 24 12c0-3.9-2.24-7.29-5.5-8.97l-1.46 1.46A8 8 0 0 1 19 12z"/></svg>
+          </button>
+          <input type="range" id="volSlider" min="0" max="1" step="0.01" value="1" oninput="setVolume(this.value)">
+        </div>
+
+        <!-- Time -->
+        <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+
+        <div class="spacer"></div>
+
+        <span class="checkpoint-count" id="cpCount">● 3 puntos de evaluación</span>
+
+        <!-- Fullscreen -->
+        <button class="ctrl-btn" onclick="toggleFullscreen()" title="Pantalla completa">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zm-3-12v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkpoint tracker -->
+  <div class="tracker" id="tracker"></div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIGURACIÓN — modifica aquí si necesitas
+// ═══════════════════════════════════════════════
+const VIDEO_SRC = "video.mp4"; // ruta o URL del video por defecto
+
+const CHECKPOINTS = [
+  {
+    time: 30, // segundos (0:30)
+    label: "Concepto de Onboarding",
+    question: "¿Cuál es el objetivo principal del proceso de onboarding en una empresa?",
+    options: [
+      { letter: "A", text: "Solo explicar las reglas del reglamento interno" },
+      { letter: "B", text: "Integrar al colaborador y facilitar su adaptación a la cultura y procesos" },
+      { letter: "C", text: "Revisar y firmar el contrato laboral" },
+      { letter: "D", text: "Evaluar el desempeño desde el primer día de trabajo" }
+    ],
+    correct: 1  // índice (base 0) de la respuesta correcta → "B"
+  },
+  {
+    time: 70, // segundos (1:10)
+    label: "Actores del proceso",
+    question: "¿Quiénes son los principales responsables de asegurar una correcta integración del nuevo colaborador?",
+    options: [
+      { letter: "A", text: "Únicamente el área de Recursos Humanos" },
+      { letter: "B", text: "El nuevo colaborador por su cuenta" },
+      { letter: "C", text: "RH, el líder directo y el equipo de trabajo en conjunto" },
+      { letter: "D", text: "La dirección general de la empresa" }
+    ],
+    correct: 2
+  },
+  {
+    time: 120, // segundos (2:00)
+    label: "Primeros pasos",
+    question: "¿Cuál de las siguientes acciones es más importante durante la primera semana de un nuevo empleado?",
+    options: [
+      { letter: "A", text: "Asignarle el mayor número de tareas posible para medir su ritmo" },
+      { letter: "B", text: "Presentarle al equipo, explicar su rol y brindarle las herramientas necesarias" },
+      { letter: "C", text: "Solicitarle que observe sin participar aún" },
+      { letter: "D", text: "Aplicarle una evaluación técnica inmediata" }
+    ],
+    correct: 1
+  }
+];
+// ═══════════════════════════════════════════════
+
+const vid          = document.getElementById('vid');
+const progressFill = document.getElementById('progressFill');
+const progressThumb= document.getElementById('progressThumb');
+const progressWrap = document.getElementById('progressWrap');
+const timeDisplay  = document.getElementById('timeDisplay');
+const btnPlay      = document.getElementById('btnPlay');
+const iconPlay     = document.getElementById('iconPlay');
+const iconVol      = document.getElementById('iconVol');
+const quizOverlay  = document.getElementById('quizOverlay');
+const quizQuestion = document.getElementById('quizQuestion');
+const optionsList  = document.getElementById('optionsList');
+const feedbackMsg  = document.getElementById('feedbackMsg');
+const feedbackText = document.getElementById('feedbackText');
+const feedbackIcon = document.getElementById('feedbackIcon');
+const btnConfirm   = document.getElementById('btnConfirm');
+const btnContinue  = document.getElementById('btnContinue');
+
+let currentCheckpointIdx = -1;
+let selectedOption       = -1;
+let answeredCheckpoints  = new Set();
+
+// Set initial source
+if (VIDEO_SRC) vid.src = VIDEO_SRC;
+
+// ── Build tracker cards & progress markers ──────
+function buildUI() {
+  const tracker = document.getElementById('tracker');
+  tracker.innerHTML = '';
+  CHECKPOINTS.forEach((cp, i) => {
+    const card = document.createElement('div');
+    card.className = 'tracker-card';
+    card.id = `tc-${i}`;
+    card.innerHTML = `
+      <div class="tc-top">
+        <span class="tc-num">Pausa ${i+1}</span>
+        <div class="tc-icon" id="tc-icon-${i}">○</div>
+      </div>
+      <div class="tc-time">${formatTime(cp.time)}</div>
+      <div class="tc-label">${cp.label}</div>`;
+    tracker.appendChild(card);
+  });
+
+  // Checkpoint markers on progress bar
+  progressWrap.querySelectorAll('.checkpoint-marker').forEach(el => el.remove());
+  // We'll update them once video loads duration
+}
+
+function updateMarkers() {
+  progressWrap.querySelectorAll('.checkpoint-marker').forEach(el => el.remove());
+  if (!vid.duration) return;
+  CHECKPOINTS.forEach(cp => {
+    const pct = (cp.time / vid.duration) * 100;
+    const m = document.createElement('div');
+    m.className = 'checkpoint-marker';
+    m.style.left = pct + '%';
+    progressWrap.appendChild(m);
+  });
+}
+
+buildUI();
+
+// ── Video events ──────────────────────────────
+vid.addEventListener('loadedmetadata', () => {
+  updateMarkers();
+  timeDisplay.textContent = `0:00 / ${formatTime(vid.duration)}`;
+  document.getElementById('cpCount').textContent = `● ${CHECKPOINTS.length} puntos de evaluación`;
+});
+
+vid.addEventListener('timeupdate', () => {
+  if (!vid.duration) return;
+  const pct = (vid.currentTime / vid.duration) * 100;
+  progressFill.style.width = pct + '%';
+  progressThumb.style.left = pct + '%';
+  timeDisplay.textContent = `${formatTime(vid.currentTime)} / ${formatTime(vid.duration)}`;
+
+  // Check checkpoints
+  CHECKPOINTS.forEach((cp, i) => {
+    if (!answeredCheckpoints.has(i) && vid.currentTime >= cp.time && currentCheckpointIdx !== i) {
+      triggerCheckpoint(i);
+    }
+  });
+});
+
+vid.addEventListener('play',  updatePlayIcon);
+vid.addEventListener('pause', updatePlayIcon);
+vid.addEventListener('ended', () => updatePlayIcon());
+
+function updatePlayIcon() {
+  if (vid.paused || vid.ended) {
+    iconPlay.innerHTML = '<path d="M8 5v14l11-7z"/>';
+  } else {
+    iconPlay.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  }
+}
+
+// ── Controls ──────────────────────────────────
+function togglePlay() {
+  if (quizOverlay.classList.contains('active')) return;
+  vid.paused ? vid.play() : vid.pause();
+}
+
+function toggleMute() {
+  vid.muted = !vid.muted;
+  document.getElementById('volSlider').value = vid.muted ? 0 : vid.volume;
+  updateVolIcon();
+}
+
+function setVolume(v) {
+  vid.volume = v;
+  vid.muted  = v == 0;
+  updateVolIcon();
+}
+
+function updateVolIcon() {
+  if (vid.muted || vid.volume === 0) {
+    iconVol.innerHTML = '<path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45A4.47 4.47 0 0 0 16.5 12zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A9.94 9.94 0 0 0 22 12c0-3.9-2.24-7.29-5.5-8.97l-1.46 1.46A7.97 7.97 0 0 1 19 12zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25A6.97 6.97 0 0 1 14 17.27V19l-5-5V9.73L4.27 3z"/>';
+  } else {
+    iconVol.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12zm2.5 0c0 2.21-.9 4.21-2.35 5.65l1.41 1.42A9.97 9.97 0 0 0 24 12c0-3.9-2.24-7.29-5.5-8.97l-1.46 1.46A8 8 0 0 1 19 12z"/>';
+  }
+}
+
+function seekVideo(e) {
+  if (!vid.duration) return;
+  const rect = progressWrap.getBoundingClientRect();
+  const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  vid.currentTime = pct * vid.duration;
+}
+
+function toggleFullscreen() {
+  const el = document.querySelector('.player-shell');
+  if (!document.fullscreenElement) {
+    el.requestFullscreen && el.requestFullscreen();
+  } else {
+    document.exitFullscreen && document.exitFullscreen();
+  }
+}
+
+// ── Quiz logic ────────────────────────────────
+function triggerCheckpoint(idx) {
+  vid.pause();
+  currentCheckpointIdx = idx;
+  selectedOption       = -1;
+  const cp = CHECKPOINTS[idx];
+
+  quizQuestion.textContent = cp.question;
+  optionsList.innerHTML    = '';
+  feedbackMsg.className    = 'feedback-msg';
+  btnConfirm.disabled      = true;
+  btnConfirm.style.display = 'block';
+  btnContinue.className    = 'btn-continue';
+
+  cp.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="letter">${opt.letter}</span><span>${opt.text}</span>`;
+    btn.onclick   = () => selectOption(i);
+    optionsList.appendChild(btn);
+  });
+
+  quizOverlay.classList.add('active');
+
+  // Update tracker card
+  document.getElementById(`tc-${idx}`).className = 'tracker-card active';
+  document.getElementById(`tc-icon-${idx}`).textContent = '▶';
+}
+
+function selectOption(i) {
+  if (btnContinue.classList.contains('show')) return; // already answered
+  selectedOption = i;
+  optionsList.querySelectorAll('.option-btn').forEach((btn, j) => {
+    btn.className = 'option-btn' + (j === i ? ' selected' : '');
+  });
+  btnConfirm.disabled = false;
+}
+
+function confirmAnswer() {
+  if (selectedOption === -1) return;
+  const cp      = CHECKPOINTS[currentCheckpointIdx];
+  const correct = selectedOption === cp.correct;
+
+  optionsList.querySelectorAll('.option-btn').forEach((btn, j) => {
+    if (j === cp.correct) btn.className = 'option-btn correct';
+    else if (j === selectedOption) btn.className = 'option-btn wrong';
+  });
+
+  if (correct) {
+    feedbackIcon.innerHTML = '<path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>';
+    feedbackMsg.className  = 'feedback-msg show good';
+    feedbackText.textContent = '¡Muy bien! Continuemos con el video.';
+  } else {
+    feedbackIcon.innerHTML = '<path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm.01 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>';
+    feedbackMsg.className  = 'feedback-msg show bad';
+    feedbackText.textContent = 'Respuesta incorrecta, pero puedes continuar.';
+  }
+
+  btnConfirm.style.display = 'none';
+  btnContinue.className    = 'btn-continue show';
+
+  // Update tracker
+  answeredCheckpoints.add(currentCheckpointIdx);
+  const card = document.getElementById(`tc-${currentCheckpointIdx}`);
+  card.className = correct ? 'tracker-card done-correct' : 'tracker-card done-wrong';
+  document.getElementById(`tc-icon-${currentCheckpointIdx}`).textContent = correct ? '✓' : '✗';
+}
+
+function continueVideo() {
+  quizOverlay.classList.remove('active');
+  vid.play();
+}
+
+// ── Source loading ─────────────────────────────
+function loadFromUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  vid.src = url;
+  vid.load();
+  resetProgress();
+}
+
+function loadFromFile(input) {
+  if (!input.files.length) return;
+  const url = URL.createObjectURL(input.files[0]);
+  vid.src   = url;
+  vid.load();
+  document.getElementById('urlInput').value = input.files[0].name;
+  resetProgress();
+}
+
+function resetProgress() {
+  answeredCheckpoints.clear();
+  currentCheckpointIdx = -1;
+  CHECKPOINTS.forEach((_, i) => {
+    const card = document.getElementById(`tc-${i}`);
+    if (card) {
+      card.className = 'tracker-card';
+      document.getElementById(`tc-icon-${i}`).textContent = '○';
+    }
+  });
+}
+
+// ── Helpers ────────────────────────────────────
+function formatTime(s) {
+  if (isNaN(s)) return '0:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') vid.currentTime = Math.min(vid.duration||0, vid.currentTime + 5);
+  if (e.code === 'ArrowLeft')  vid.currentTime = Math.max(0, vid.currentTime - 5);
+});
+
+// Auto-load default if set
+if (VIDEO_SRC) {
+  document.getElementById('urlInput').value = VIDEO_SRC;
+}
+
+// Update markers once duration is known
+vid.addEventListener('durationchange', updateMarkers);
+</script>
+</body>
+</html>
